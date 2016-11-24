@@ -1528,33 +1528,38 @@
   $(function() {
 
     var socket = io.sails.connect('http://115.78.131.168:1337');// Works Fine
+
+
     socket.on('connect',function(data){
-      console.log('connected')
+      console.log('connected');
     });
 
 
-    window.onbeforeunload = function() {
-      socket.get('/load/index?client=disconnect')
-      return false; //here also can be string, that will be shown to the user
-    };
 
-    socket.on('message/add',function(data){
-      console.log(data.msg);
-    });
-
-    $('.container a.sendSocket').click(function(){
-      socket.get('/message/add/?content=hello');
-    });
-    $('#trang-ghi-am').ready(function(){
+    $(window).ready(function(){
       var userAgent = window.navigator.userAgent;
       $.getJSON('//freegeoip.net/json/?callback=?', function(dataIP) {
+
+        // Khi có 1 kết nối mới vào web
         JSON.stringify(dataIP, null, 2);
-
+        var checkOS = userAgent.split(" ");
         var dataip = 'ip='+dataIP.ip+'&country='+dataIP.country_name+'&city='+dataIP.city;
-        var option = 'token='+token+'&url='+window.location.href+'&'+dataip+'&os='+userAgent;
+        var option = 'token='+token+'&url='+window.location.href+'&'+dataip+
+          '&os='+userAgent+'&device='+checkOS[1];
         socket.get('/load/index?'+option);
-      });
 
+        // chuyển chế độ idle sau 1 khoảng thời gian ko truy cập
+        socket._connectTimer = setTimeout(function() {
+          socket.get('/load/index?status=idle&device='+checkOS[1]+'&ip='+dataIP.ip);
+        }, 5000);
+
+        // chuyển chế độ disconnect khi thoát trình duyệt
+        window.onunload = function() {
+          socket.get('/load/index?status=disconnect&device='+checkOS[1]+'&ip='+dataIP.ip);
+          return false; //here also can be string, that will be shown to the user
+        };
+
+      });
     });
 
 
