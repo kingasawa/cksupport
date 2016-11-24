@@ -1551,7 +1551,7 @@
         // chuyển chế độ idle sau 1 khoảng thời gian ko truy cập
         socket._connectTimer = setTimeout(function() {
           socket.get('/load/index?status=idle&device='+checkOS[1]+'&ip='+dataIP.ip);
-        }, 5000);
+        }, 900000);
 
         // chuyển chế độ disconnect khi thoát trình duyệt
         window.onunload = function() {
