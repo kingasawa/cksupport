@@ -27,6 +27,9 @@ module.exports = {
       type: 'string'
     },
     url: {
+      type: 'longtext'
+    },
+    title: {
       type: 'string'
     },
     status: {

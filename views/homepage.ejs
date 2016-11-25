@@ -29,17 +29,25 @@
       </nav>
       <table class="table" id="guest-info-table">
         <tbody>
-        <% if (allGuest) { _.each(allGuest,function(guest) { %>
-          <tr class="guest<%= guest.name %>">
-            <td class="guest-name">Guest<%= guest.name %></td>
-            <td class="guest-ip"><%= guest.ip %></td>
-            <td class="guest-title"><%= guest.title %></td>
-            <td class="guest-url"><%= guest.url %></td>
+        <% if (allConnect) { _.each(allConnect,function(connect) { %>
+          <tr class="guest<%= connect.name %>">
+            <td class="guest-name">Guest<%= connect.name %></td>
+            <td class="guest-ip"><%= connect.ip %></td>
+            <td class="guest-title"><a href="<%= connect.url %>"><%= connect.title %></a></td>
             <td class="guest-browser">browser</td>
-            <td class="guest-status"><%= guest.status %></td>
+            <td class="guest-status"><%= connect.status %></td>
           </tr>
         <% })} %>
 
+        <% if (allIdle) { _.each(allIdle,function(idle) { %>
+        <tr class="guest<%= idle.name %>">
+          <td class="guest-name">Guest<%= idle.name %></td>
+          <td class="guest-ip"><%= idle.ip %></td>
+          <td class="guest-title"><a href="<%= idle.url %>"><%= idle.title %></a></td>
+          <td class="guest-browser">browser</td>
+          <td class="guest-status"><%= idle.status %></td>
+        </tr>
+        <% })} %>
 
         </tbody>
       </table>

@@ -1537,25 +1537,33 @@
 
 
     $(window).ready(function(){
+      var title = document.title;
       var userAgent = window.navigator.userAgent;
       $.getJSON('//freegeoip.net/json/?callback=?', function(dataIP) {
 
         // Khi có 1 kết nối mới vào web
         JSON.stringify(dataIP, null, 2);
         var checkOS = userAgent.split(" ");
-        var dataip = 'ip='+dataIP.ip+'&country='+dataIP.country_name+'&city='+dataIP.city;
-        var option = 'token='+token+'&url='+window.location.href+'&'+dataip+
-          '&os='+userAgent+'&device='+checkOS[1];
-        socket.get('/load/index?'+option);
+        var data = {
+          ip: dataIP.ip,
+          country:dataIP.country_name,
+          city:dataIP.city
+        };
+        data.title = title;
+        data.token = token;
+        data.url = window.location.href;
+        data.os = userAgent;
+        data.device = checkOS[1];
+        socket.post('/load/index',data);
 
         // chuyển chế độ idle sau 1 khoảng thời gian ko truy cập
         socket._connectTimer = setTimeout(function() {
-          socket.get('/load/index?status=idle&device='+checkOS[1]+'&ip='+dataIP.ip);
-        }, 900000);
+          socket.post('/load/index', {status:idle,device:checkOS[1],ip:dataIP.ip});
+        }, 10000);
 
         // chuyển chế độ disconnect khi thoát trình duyệt
         window.onunload = function() {
-          socket.get('/load/index?status=disconnect&device='+checkOS[1]+'&ip='+dataIP.ip);
+          socket.post('/load/index',{status:'disconnect',device:checkOS[1],ip:dataIP.ip});
           return false; //here also can be string, that will be shown to the user
         };
 

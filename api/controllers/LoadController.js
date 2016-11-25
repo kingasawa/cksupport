@@ -7,18 +7,21 @@
 
 module.exports = {
   home: function (req,res) {
-    Online.find(function(err,allGuest) {
-      if (err) return res.negotiate(err);
-      res.view('homepage',{allGuest});
+    Online.find({status:'connect'}).exec(function(err,allConnect) {
+      Online.find({status: 'idle'}).exec(function (err, allIdle) {
+        if (err) return res.negotiate(err);
+        res.view('homepage', {allConnect, allIdle});
+      })
     })
   },
 
 	index: function(req,res) {
-	  let params = req.allParams();
+    let params = req.body;
+    console.log(req.session.id);
     if (params.device == '(iPhone;') {
       var session_id = params.ip;
     } else {
-      var session_id = req.signedCookies['sails.sid'];
+      var session_id = req.session.id;
     }
 
     // if (params.client == 'disconnect') {
@@ -32,7 +35,7 @@ module.exports = {
       // }
     if (params.client == 'disconnect') {
       sails.sockets.blast('update/stt',{msg:'disconnect'});
-      Online.update({session:session_id},{status:'disconnect'})
+      Online.detroy({session:session_id})
     } else {
       Online.findOne({session:session_id})
         .exec(function(err,foundGuest){
@@ -43,7 +46,7 @@ module.exports = {
                 .exec(function(err,updateStt){
                   var [updatestt] = updateStt;
                   sails.sockets.blast('update/stt',{msg:updatestt});
-                  console.log(updatestt);
+
                 });
             } else if (params.status == 'disconnect') {
               console.log('status disconnect');
@@ -51,19 +54,19 @@ module.exports = {
                 .exec(function(err,updateStt){
                   var [updatestt] = updateStt;
                   sails.sockets.blast('update/stt',{msg:updatestt});
-                  console.log(updatestt);
+
                 });
             } else {
-            Online.update({session:session_id},{url:params.url,status:'connect'})
+            Online.update({session:session_id},{url:params.url,title:params.title,status:'connect'})
               .exec(function(err,guestUpdate){
                 if (err) return res.negotiate(err) ;
                 var [guestupdate] = guestUpdate;
-                console.log(guestupdate);
                 sails.sockets.blast('update/url',{msg:guestupdate});
               })
             }
           } else {
             var guest = Math.floor(Math.random() * 100000000);
+
             Online.create({
               session:session_id,
               name:guest,
@@ -72,13 +75,14 @@ module.exports = {
               city:params.city,
               os:params.os,
               url:params.url,
+              title:params.title,
               status:'connect',
               token:params.token
             }).exec(function(err,dataGuest){
               if (err) return res.negotiate(err);
               sails.sockets.join(req,session_id);
               sails.sockets.blast('add/show',{msg:dataGuest});
-              console.log(dataGuest)
+
             })
           }
         })
