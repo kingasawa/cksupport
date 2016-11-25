@@ -1538,6 +1538,7 @@
 
     $(window).ready(function(){
       var title = document.title;
+
       var userAgent = window.navigator.userAgent;
       $.getJSON('//freegeoip.net/json/?callback=?', function(dataIP) {
 
